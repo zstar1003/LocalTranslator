@@ -5,6 +5,7 @@
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
+    QApplication,
     QComboBox,
     QGroupBox,
     QHBoxLayout,
@@ -14,35 +15,38 @@ from PyQt6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QTextEdit,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtGui import QFont
 
 from translator.config import (
+    APP_HEIGHT,
+    APP_MIN_HEIGHT,
+    APP_MIN_WIDTH,
     APP_TITLE,
     APP_WIDTH,
-    APP_HEIGHT,
-    APP_MIN_WIDTH,
-    APP_MIN_HEIGHT,
     LANGUAGES,
-    TEXT_READY,
-    TEXT_TRANSLATING,
-    TEXT_TRANSLATION_COMPLETE,
-    TEXT_TRANSLATION_FAILED,
-    TEXT_PREPARING,
-    TEXT_INPUT_PLACEHOLDER,
-    TEXT_OUTPUT_PLACEHOLDER,
-    TEXT_WARNING,
-    TEXT_EMPTY_INPUT,
-    TEXT_PROGRESS,
-    TEXT_TRANSLATE,
     TEXT_CLEAR,
+    TEXT_COPY,
+    TEXT_COPY_TOOLTIP,
+    TEXT_COPIED,
+    TEXT_EMPTY_INPUT,
     TEXT_INPUT,
+    TEXT_INPUT_PLACEHOLDER,
     TEXT_OUTPUT,
+    TEXT_OUTPUT_PLACEHOLDER,
+    TEXT_PREPARING,
+    TEXT_PROGRESS,
+    TEXT_READY,
     TEXT_SOURCE_LANG,
     TEXT_TARGET_LANG,
     TEXT_THEME_TOOLTIP,
+    TEXT_TRANSLATE,
+    TEXT_TRANSLATING,
+    TEXT_TRANSLATION_COMPLETE,
+    TEXT_TRANSLATION_FAILED,
+    TEXT_WARNING,
 )
 from translator.themes import apply_dark_theme, apply_light_theme
 from translator.translation_thread import TranslationThread
@@ -154,11 +158,34 @@ class TranslatorApp(QMainWindow):
         target_lang_layout.addStretch(1)
         right_layout.addLayout(target_lang_layout)
 
+        # 输出文本区域和复制按钮的容器
+        output_container = QWidget()
+        output_container_layout = QVBoxLayout(output_container)
+        output_container_layout.setContentsMargins(0, 0, 0, 0)
+
         # 输出文本区域
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
         self.output_text.setPlaceholderText(TEXT_OUTPUT_PLACEHOLDER)
-        right_layout.addWidget(self.output_text)
+        output_container_layout.addWidget(self.output_text)
+
+        # 复制按钮 - 放在右下角
+        copy_button_layout = QHBoxLayout()
+        copy_button_layout.addStretch(1)
+
+        self.copy_button = QToolButton()
+        self.copy_button.setToolTip(TEXT_COPY_TOOLTIP)
+        self.copy_button.setText("📋")  # 使用剪贴板图标
+        self.copy_button.setFixedSize(28, 28)
+        self.copy_button.setObjectName("copyButton")  # 设置对象名，用于特定样式
+        self.copy_button.clicked.connect(self.copy_to_clipboard)
+        self.copy_button.setCursor(
+            Qt.CursorShape.PointingHandCursor
+        )  # 鼠标悬停时显示手型光标
+        copy_button_layout.addWidget(self.copy_button)
+
+        output_container_layout.addLayout(copy_button_layout)
+        right_layout.addWidget(output_container)
 
         # 添加右侧布局到内容布局
         content_layout.addWidget(right_group)
@@ -241,12 +268,30 @@ class TranslatorApp(QMainWindow):
 
     def toggle_theme(self):
         """切换明暗主题"""
+        from PyQt6.QtWidgets import QApplication
+
         self.is_dark_theme = not self.is_dark_theme
 
         # 根据当前主题状态应用相应的主题
         if self.is_dark_theme:
-            apply_dark_theme(self.parent().parent())  # 应用到QApplication实例
+            apply_dark_theme(QApplication.instance())  # 应用到QApplication实例
             self.theme_button.setText("🌞")  # 太阳图标表示可以切换到亮色主题
         else:
-            apply_light_theme(self.parent().parent())  # 应用到QApplication实例
+            apply_light_theme(QApplication.instance())  # 应用到QApplication实例
             self.theme_button.setText("🌓")  # 月亮图标表示可以切换到暗色主题
+
+    def copy_to_clipboard(self):
+        """复制翻译结果到剪贴板"""
+        text = self.output_text.toPlainText()
+        if text:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(text)
+
+            # 临时更改状态标签，显示已复制信息
+            original_status = self.status_label.text()
+            self.status_label.setText(TEXT_COPIED)
+
+            # 使用计时器在1.5秒后恢复原始状态
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(1500, lambda: self.status_label.setText(original_status))

@@ -75,6 +75,21 @@ def apply_dark_theme(app):
         QPushButton#themeButton:pressed {
             background-color: rgba(42, 130, 218, 0.3);
         }
+        /* 复制按钮特殊样式 */
+        QToolButton#copyButton {
+            background-color: transparent;
+            border: 1px solid #3A3A3A;
+            border-radius: 14px;
+            padding: 0px;
+            font-size: 16px;
+            color: #DDDDDD;
+        }
+        QToolButton#copyButton:hover {
+            background-color: rgba(42, 130, 218, 0.2);
+        }
+        QToolButton#copyButton:pressed {
+            background-color: rgba(42, 130, 218, 0.3);
+        }
         QTextEdit {
             border: 1px solid #3A3A3A;
             border-radius: 6px;
@@ -184,6 +199,21 @@ def apply_light_theme(app):
             background-color: rgba(0, 120, 215, 0.1);
         }
         QPushButton#themeButton:pressed {
+            background-color: rgba(0, 120, 215, 0.2);
+        }
+        /* 复制按钮特殊样式 */
+        QToolButton#copyButton {
+            background-color: transparent;
+            border: 1px solid #CCCCCC;
+            border-radius: 14px;
+            padding: 0px;
+            font-size: 16px;
+            color: #333333;
+        }
+        QToolButton#copyButton:hover {
+            background-color: rgba(0, 120, 215, 0.1);
+        }
+        QToolButton#copyButton:pressed {
             background-color: rgba(0, 120, 215, 0.2);
         }
         QTextEdit {

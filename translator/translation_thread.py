@@ -3,10 +3,12 @@
 处理翻译任务，避免UI卡顿
 """
 
+import os
+
 from PyQt6.QtCore import QThread, pyqtSignal
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
-from translator.config import MODEL_NAME
+from translator.config import MODEL_PATH, MODEL_NAME, USE_LOCAL_MODEL
 
 
 class TranslationThread(QThread):
@@ -25,16 +27,39 @@ class TranslationThread(QThread):
             # 更新进度条 - 开始加载模型
             self.progress_update.emit(10)
 
-            # 加载模型和分词器
-            model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
-            self.progress_update.emit(50)
+            # 加载模型和分词器 - 优先使用本地模型
+            if USE_LOCAL_MODEL:
+                self.progress_update.emit(20)
+                # 直接从本地模型目录加载
+                model = T5ForConditionalGeneration.from_pretrained(MODEL_PATH)
+                self.progress_update.emit(50)
+                tokenizer = T5Tokenizer.from_pretrained(MODEL_PATH)
+            else:
+                # 如果本地模型不存在，则从在线加载
+                model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+                self.progress_update.emit(50)
+                tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
 
-            tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
+                # 保存模型到本地以便下次使用
+                try:
+                    os.makedirs(MODEL_PATH, exist_ok=True)
+                    model.save_pretrained(MODEL_PATH)
+                    tokenizer.save_pretrained(MODEL_PATH)
+                except Exception as e:
+                    print(f"保存模型到本地时出错: {str(e)}")
+
             self.progress_update.emit(70)
 
             # 准备输入
+            # 对特殊组合词进行处理，避免被拆分
+            processed_text = self.text
+            # 将连字符组合词用引号包围，避免被拆分
+            import re
+
+            processed_text = re.sub(r"(\w+)-(\w+)", r'"\1-\2"', processed_text)
+
             prefix = f"translate to {self.target_lang}: "
-            src_text = prefix + self.text
+            src_text = prefix + processed_text
 
             # 分词和生成翻译
             input_ids = tokenizer(src_text, return_tensors="pt")

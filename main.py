@@ -5,8 +5,8 @@ AI 智能翻译器主入口文件
 
 import sys
 
-from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QApplication
 
 from translator.config import DEFAULT_FONT, DEFAULT_FONT_SIZE
 from translator.themes import apply_light_theme

@@ -3,6 +3,8 @@
 包含常量和配置项
 """
 
+import os
+
 # 应用配置
 APP_TITLE = "AI 智能翻译器"
 APP_WIDTH = 900
@@ -12,6 +14,9 @@ APP_MIN_HEIGHT = 450
 
 # 翻译模型配置
 MODEL_NAME = "utrobinmv/t5_translate_en_ru_zh_small_1024"
+# 本地模型路径
+MODEL_PATH = "./models"
+USE_LOCAL_MODEL = os.path.exists(MODEL_PATH)
 
 # 支持的语言
 LANGUAGES = {"中文": "zh", "英文": "en", "俄文": "ru"}
@@ -38,3 +43,6 @@ TEXT_OUTPUT = "翻译结果"
 TEXT_SOURCE_LANG = "源语言:"
 TEXT_TARGET_LANG = "目标语言:"
 TEXT_THEME_TOOLTIP = "切换主题"
+TEXT_COPY = "复制"
+TEXT_COPY_TOOLTIP = "复制到剪贴板"
+TEXT_COPIED = "已复制到剪贴板"
