@@ -6,7 +6,7 @@
 import os
 
 # 应用配置
-APP_TITLE = "AI 智能翻译器"
+APP_TITLE = "本地翻译器"
 APP_WIDTH = 900
 APP_HEIGHT = 500
 APP_MIN_WIDTH = 800

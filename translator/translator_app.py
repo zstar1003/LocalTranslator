@@ -4,6 +4,7 @@
 """
 
 from PyQt6.QtCore import QPoint, Qt
+from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -109,6 +110,18 @@ class TranslatorApp(QMainWindow):
         self.setWindowTitle(APP_TITLE)
         self.setGeometry(100, 100, APP_WIDTH, APP_HEIGHT)
         self.setMinimumSize(APP_MIN_WIDTH, APP_MIN_HEIGHT)
+
+        # 设置窗口图标
+        try:
+            import os
+
+            logo_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), "ui", "logo.png"
+            )
+            if os.path.exists(logo_path):
+                self.setWindowIcon(QIcon(logo_path))
+        except Exception as e:
+            print(f"无法加载logo: {e}")
 
         # 创建中心部件
         central_widget = QWidget()
