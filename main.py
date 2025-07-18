@@ -1,4 +1,7 @@
 import sys
+
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QColor, QFont, QPalette
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -13,8 +16,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QThread, pyqtSignal, Qt, QSize
-from PyQt6.QtGui import QColor, QFont, QPalette, QIcon
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 
@@ -69,6 +70,7 @@ class TranslationThread(QThread):
 class TranslatorApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.is_dark_theme = False  # 默认使用亮色主题
         self.initUI()
         self.translation_thread = None
 
@@ -82,14 +84,12 @@ class TranslatorApp(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
-        # 设置应用图标（如果有的话）
-        # self.setWindowIcon(QIcon("icon.png"))
-
         # 主布局 - 垂直布局，包含上部的左右布局和下部的进度条
         main_layout = QVBoxLayout(central_widget)
 
         # 创建左右布局
         content_layout = QHBoxLayout()
+        content_layout.setSpacing(5)  # 进一步减小左右容器之间的间距
 
         # 左侧布局 - 输入区域
         left_group = QGroupBox("输入")
@@ -113,30 +113,46 @@ class TranslatorApp(QMainWindow):
         # 添加左侧布局到内容布局
         content_layout.addWidget(left_group)
 
-        # 中间控制按钮区域
+        # 中间控制按钮区域 - 减小间距
         middle_layout = QVBoxLayout()
+        middle_layout.setSpacing(5)  # 进一步减小垂直间距
+        middle_layout.setContentsMargins(2, 2, 2, 2)  # 进一步减小边距
+        middle_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 垂直居中对齐
+
+        # 主题切换按钮 - 放在最上方
+        self.theme_button = QPushButton()
+        self.theme_button.setFixedSize(28, 28)  # 进一步减小尺寸
+        self.theme_button.setToolTip("切换主题")
+        self.theme_button.setObjectName("themeButton")  # 设置对象名，用于特定样式
+        # 使用文本作为图标
+        self.theme_button.setText("🌓")
+        self.theme_button.clicked.connect(self.toggle_theme)
+
+        # 添加主题按钮到中间布局
+        theme_button_layout = QHBoxLayout()
+        theme_button_layout.addWidget(
+            self.theme_button, 0, Qt.AlignmentFlag.AlignCenter
+        )
+        middle_layout.addLayout(theme_button_layout)
+
+        # 添加垂直弹性空间，使按钮垂直居中
         middle_layout.addStretch(1)
 
         # 翻译按钮
-        self.translate_button = QPushButton("翻译 →")
-        self.translate_button.setFixedWidth(120)
-        self.translate_button.setFixedHeight(40)
+        self.translate_button = QPushButton("翻译")
+        self.translate_button.setFixedWidth(80)  # 进一步减小宽度
+        self.translate_button.setFixedHeight(32)  # 进一步减小高度
         self.translate_button.clicked.connect(self.start_translation)
-        middle_layout.addWidget(self.translate_button)
+        middle_layout.addWidget(self.translate_button, 0, Qt.AlignmentFlag.AlignCenter)
 
         # 清除按钮
         self.clear_button = QPushButton("清除")
-        self.clear_button.setFixedWidth(120)
-        self.clear_button.setFixedHeight(40)
+        self.clear_button.setFixedWidth(80)  # 进一步减小宽度
+        self.clear_button.setFixedHeight(32)  # 进一步减小高度
         self.clear_button.clicked.connect(self.clear_text)
-        middle_layout.addWidget(self.clear_button)
+        middle_layout.addWidget(self.clear_button, 0, Qt.AlignmentFlag.AlignCenter)
 
-        # 交换语言按钮
-        self.swap_button = QPushButton("交换语言")
-        self.swap_button.setFixedWidth(120)
-        self.swap_button.clicked.connect(self.swap_languages)
-        middle_layout.addWidget(self.swap_button)
-
+        # 添加垂直弹性空间，使按钮垂直居中
         middle_layout.addStretch(1)
         content_layout.addLayout(middle_layout)
 
@@ -239,26 +255,17 @@ class TranslatorApp(QMainWindow):
         self.progress_bar.setValue(0)
         self.status_label.setText("就绪")
 
-    def swap_languages(self):
-        """交换源语言和目标语言"""
-        source_idx = self.source_lang_combo.currentIndex()
-        target_idx = self.target_lang_combo.currentIndex()
+    def toggle_theme(self):
+        """切换明暗主题"""
+        self.is_dark_theme = not self.is_dark_theme
 
-        # 交换语言选择
-        self.source_lang_combo.setCurrentIndex(target_idx)
-        self.target_lang_combo.setCurrentIndex(source_idx)
-
-        # 交换文本内容
-        input_text = self.input_text.toPlainText()
-        output_text = self.output_text.toPlainText()
-
-        if (
-            output_text
-            and output_text != "翻译失败"
-            and not output_text.startswith("翻译出错:")
-        ):
-            self.input_text.setText(output_text)
-            self.output_text.setText(input_text if input_text else "")
+        # 根据当前主题状态应用相应的主题
+        if self.is_dark_theme:
+            apply_dark_theme(QApplication.instance())
+            self.theme_button.setText("🌞")  # 太阳图标表示可以切换到亮色主题
+        else:
+            apply_light_theme(QApplication.instance())
+            self.theme_button.setText("🌓")  # 月亮图标表示可以切换到暗色主题
 
 
 def apply_dark_theme(app):
@@ -316,6 +323,20 @@ def apply_dark_theme(app):
         QPushButton:disabled {
             background-color: #555555;
         }
+        /* 主题切换按钮特殊样式 */
+        QPushButton#themeButton {
+            background-color: transparent;
+            border: 1px solid #3A3A3A;
+            border-radius: 15px;
+            padding: 0px;
+            font-size: 16px;
+        }
+        QPushButton#themeButton:hover {
+            background-color: rgba(42, 130, 218, 0.2);
+        }
+        QPushButton#themeButton:pressed {
+            background-color: rgba(42, 130, 218, 0.3);
+        }
         QTextEdit {
             border: 1px solid #3A3A3A;
             border-radius: 6px;
@@ -357,17 +378,130 @@ def apply_dark_theme(app):
     """)
 
 
+def apply_light_theme(app):
+    """应用明亮主题样式"""
+    app.setStyle("Fusion")
+
+    # 创建明亮调色板
+    light_palette = QPalette()
+    light_palette.setColor(QPalette.ColorRole.Window, QColor(240, 240, 240))
+    light_palette.setColor(QPalette.ColorRole.WindowText, QColor(0, 0, 0))
+    light_palette.setColor(QPalette.ColorRole.Base, QColor(255, 255, 255))
+    light_palette.setColor(QPalette.ColorRole.AlternateBase, QColor(233, 233, 233))
+    light_palette.setColor(QPalette.ColorRole.ToolTipBase, QColor(255, 255, 255))
+    light_palette.setColor(QPalette.ColorRole.ToolTipText, QColor(0, 0, 0))
+    light_palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))
+    light_palette.setColor(QPalette.ColorRole.Button, QColor(240, 240, 240))
+    light_palette.setColor(QPalette.ColorRole.ButtonText, QColor(0, 0, 0))
+    light_palette.setColor(QPalette.ColorRole.Link, QColor(0, 102, 204))
+    light_palette.setColor(QPalette.ColorRole.Highlight, QColor(0, 120, 215))
+    light_palette.setColor(QPalette.ColorRole.HighlightedText, QColor(255, 255, 255))
+
+    # 应用调色板
+    app.setPalette(light_palette)
+
+    # 设置样式表
+    app.setStyleSheet("""
+        QGroupBox {
+            border: 1px solid #CCCCCC;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            background-color: #F5F5F5;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 8px 0 8px;
+            color: #0078D7;
+        }
+        QPushButton {
+            background-color: #0078D7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px;
+            font-weight: bold;
+        }
+        QPushButton:hover {
+            background-color: #1C84DC;
+        }
+        QPushButton:pressed {
+            background-color: #0067C0;
+        }
+        QPushButton:disabled {
+            background-color: #CCCCCC;
+        }
+        /* 主题切换按钮特殊样式 */
+        QPushButton#themeButton {
+            background-color: transparent;
+            border: 1px solid #CCCCCC;
+            border-radius: 15px;
+            padding: 0px;
+            font-size: 16px;
+            color: #333333;
+        }
+        QPushButton#themeButton:hover {
+            background-color: rgba(0, 120, 215, 0.1);
+        }
+        QPushButton#themeButton:pressed {
+            background-color: rgba(0, 120, 215, 0.2);
+        }
+        QTextEdit {
+            border: 1px solid #CCCCCC;
+            border-radius: 6px;
+            padding: 8px;
+            background-color: white;
+            color: black;
+            selection-background-color: #0078D7;
+        }
+        QComboBox {
+            border: 1px solid #CCCCCC;
+            border-radius: 6px;
+            padding: 6px;
+            background-color: white;
+            min-height: 24px;
+        }
+        QComboBox::drop-down {
+            border: none;
+            width: 24px;
+        }
+        QLabel {
+            color: #333333;
+        }
+        QProgressBar {
+            border: 1px solid #CCCCCC;
+            border-radius: 6px;
+            text-align: center;
+            height: 20px;
+            background-color: #F0F0F0;
+            color: black;
+        }
+        QProgressBar::chunk {
+            background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #0067C0, stop:1 #1C84DC);
+            border-radius: 5px;
+        }
+        QStatusBar {
+            background-color: #F0F0F0;
+            color: #333333;
+        }
+    """)
+
+
 def main():
     app = QApplication(sys.argv)
-
-    # 应用现代深色主题
-    apply_dark_theme(app)
 
     # 设置全局字体
     font = QFont("Microsoft YaHei UI", 10)
     app.setFont(font)
 
     translator = TranslatorApp()
+
+    # 默认应用亮色主题
+    apply_light_theme(app)
+    translator.theme_button.setText("🌓")  # 月亮图标表示可以切换到暗色主题
+
     translator.show()
     sys.exit(app.exec())
 
