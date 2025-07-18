@@ -1,5 +1,3 @@
-import os
-
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 device = "cpu"  # or 'cpu' for translate on cpu

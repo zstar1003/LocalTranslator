@@ -104,10 +104,22 @@ def apply_dark_theme(app):
             padding: 6px;
             background-color: #2D2D2D;
             min-height: 24px;
+            color: #FFFFFF;
         }
         QComboBox::drop-down {
             border: none;
             width: 24px;
+        }
+        QComboBox QAbstractItemView {
+            background-color: #2D2D2D;
+            color: #FFFFFF;
+            selection-background-color: #2A82DA;
+            selection-color: #FFFFFF;
+            border: 1px solid #3A3A3A;
+        }
+        QComboBox QAbstractItemView::item:hover {
+            background-color: #3A3A3A;
+            color: #FFFFFF;
         }
         QLabel {
             color: #DDDDDD;
@@ -230,10 +242,22 @@ def apply_light_theme(app):
             padding: 6px;
             background-color: white;
             min-height: 24px;
+            color: #333333;
         }
         QComboBox::drop-down {
             border: none;
             width: 24px;
+        }
+        QComboBox QAbstractItemView {
+            background-color: white;
+            color: #333333;
+            selection-background-color: #0078D7;
+            selection-color: white;
+            border: 1px solid #CCCCCC;
+        }
+        QComboBox QAbstractItemView::item:hover {
+            background-color: #E5F1FB;
+            color: #333333;
         }
         QLabel {
             color: #333333;

@@ -3,7 +3,7 @@
 包含主窗口和UI逻辑
 """
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -28,9 +28,8 @@ from translator.config import (
     APP_WIDTH,
     LANGUAGES,
     TEXT_CLEAR,
-    TEXT_COPY,
-    TEXT_COPY_TOOLTIP,
     TEXT_COPIED,
+    TEXT_COPY_TOOLTIP,
     TEXT_EMPTY_INPUT,
     TEXT_INPUT,
     TEXT_INPUT_PLACEHOLDER,
@@ -50,6 +49,52 @@ from translator.config import (
 )
 from translator.themes import apply_dark_theme, apply_light_theme
 from translator.translation_thread import TranslationThread
+
+
+# 自定义ComboBox类，强制下拉菜单始终向下展开
+class DownComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # 设置下拉菜单的基本属性
+        self.setMaxVisibleItems(5)  # 最多显示5个选项
+        self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+
+    def showPopup(self):
+        from PyQt6.QtCore import QTimer
+
+        # 调用父类方法显示下拉菜单
+        super().showPopup()
+
+        # 使用定时器延迟调整位置，确保下拉菜单已经完全创建
+        QTimer.singleShot(0, self._adjust_popup_position)
+
+    def _adjust_popup_position(self):
+        """调整下拉菜单位置，确保始终在ComboBox下方显示"""
+        popup = self.view()
+        if not popup:
+            return
+
+        # 获取下拉菜单的容器窗口
+        popup_window = popup.window()
+        if not popup_window:
+            return
+
+        # 获取当前ComboBox在屏幕上的位置和尺寸
+        global_pos = self.mapToGlobal(QPoint(0, 0))
+        combo_height = self.height()
+        combo_width = self.width()
+
+        # 计算下拉菜单应该显示的位置（在ComboBox下方）
+        popup_x = global_pos.x()
+        popup_y = global_pos.y() + combo_height
+
+        # 获取下拉菜单的当前尺寸
+        popup_width = max(popup_window.width(), combo_width)
+        popup_height = popup_window.height()
+
+        # 强制设置下拉菜单的位置
+        popup_window.move(popup_x, popup_y)
+        popup_window.resize(popup_width, popup_height)
 
 
 class TranslatorApp(QMainWindow):
@@ -83,9 +128,12 @@ class TranslatorApp(QMainWindow):
         # 源语言选择
         source_lang_layout = QHBoxLayout()
         self.source_lang_label = QLabel(TEXT_SOURCE_LANG)
-        self.source_lang_combo = QComboBox()
+        # 使用自定义的DownComboBox类，强制下拉菜单始终向下展开
+        self.source_lang_combo = DownComboBox()
         for lang, code in LANGUAGES.items():
             self.source_lang_combo.addItem(f"{lang} ({code})")
+        # 设置默认源语言为英文
+        self.source_lang_combo.setCurrentText("英文 (en)")
         source_lang_layout.addWidget(self.source_lang_label)
         source_lang_layout.addWidget(self.source_lang_combo)
         source_lang_layout.addStretch(1)
@@ -149,10 +197,13 @@ class TranslatorApp(QMainWindow):
         # 目标语言选择
         target_lang_layout = QHBoxLayout()
         self.target_lang_label = QLabel(TEXT_TARGET_LANG)
-        self.target_lang_combo = QComboBox()
+        # 使用自定义的DownComboBox类，强制下拉菜单始终向下展开
+        self.target_lang_combo = DownComboBox()
         # 默认目标语言与源语言不同
         for lang, code in LANGUAGES.items():
             self.target_lang_combo.addItem(f"{lang} ({code})")
+        # 设置默认目标语言为中文
+        self.target_lang_combo.setCurrentText("中文 (zh)")
         target_lang_layout.addWidget(self.target_lang_label)
         target_lang_layout.addWidget(self.target_lang_combo)
         target_lang_layout.addStretch(1)
