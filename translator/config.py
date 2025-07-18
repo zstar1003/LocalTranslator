@@ -17,6 +17,8 @@ MODEL_NAME = "utrobinmv/t5_translate_en_ru_zh_small_1024"
 # 本地模型路径
 MODEL_PATH = "./models"
 USE_LOCAL_MODEL = os.path.exists(MODEL_PATH)
+# 输入文本长度限制
+MAX_INPUT_LENGTH = 500
 
 # 支持的语言
 LANGUAGES = {"中文": "zh", "英文": "en", "俄文": "ru"}
@@ -46,3 +48,6 @@ TEXT_THEME_TOOLTIP = "切换主题"
 TEXT_COPY = "复制"
 TEXT_COPY_TOOLTIP = "复制到剪贴板"
 TEXT_COPIED = "已复制到剪贴板"
+TEXT_INPUT_TOO_LONG = "输入文本过长"
+TEXT_INPUT_LENGTH_WARNING = f"输入文本超过{MAX_INPUT_LENGTH}字符限制，将自动截断"
+TEXT_INPUT_LENGTH_INFO = f"当前字符数: {{}} / {MAX_INPUT_LENGTH}"

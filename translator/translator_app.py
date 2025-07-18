@@ -4,7 +4,7 @@
 """
 
 from PyQt6.QtCore import QPoint, Qt
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -28,12 +28,16 @@ from translator.config import (
     APP_TITLE,
     APP_WIDTH,
     LANGUAGES,
+    MAX_INPUT_LENGTH,
     TEXT_CLEAR,
     TEXT_COPIED,
     TEXT_COPY_TOOLTIP,
     TEXT_EMPTY_INPUT,
     TEXT_INPUT,
+    TEXT_INPUT_LENGTH_INFO,
+    TEXT_INPUT_LENGTH_WARNING,
     TEXT_INPUT_PLACEHOLDER,
+    TEXT_INPUT_TOO_LONG,
     TEXT_OUTPUT,
     TEXT_OUTPUT_PLACEHOLDER,
     TEXT_PREPARING,
@@ -155,7 +159,13 @@ class TranslatorApp(QMainWindow):
         # 输入文本区域
         self.input_text = QTextEdit()
         self.input_text.setPlaceholderText(TEXT_INPUT_PLACEHOLDER)
+        self.input_text.textChanged.connect(self.update_character_count)
         left_layout.addWidget(self.input_text)
+
+        # 字符计数标签
+        self.char_count_label = QLabel(TEXT_INPUT_LENGTH_INFO.format(0))
+        self.char_count_label.setStyleSheet("color: gray; font-size: 10px;")
+        left_layout.addWidget(self.char_count_label)
 
         # 添加左侧布局到内容布局
         content_layout.addWidget(left_group)
@@ -280,12 +290,42 @@ class TranslatorApp(QMainWindow):
 
         main_layout.addLayout(status_layout)
 
+    def update_character_count(self):
+        """更新字符计数显示"""
+        text = self.input_text.toPlainText()
+        char_count = len(text)
+
+        # 更新字符计数标签
+        self.char_count_label.setText(TEXT_INPUT_LENGTH_INFO.format(char_count))
+
+        # 根据字符数量改变标签颜色
+        if char_count > MAX_INPUT_LENGTH:
+            self.char_count_label.setStyleSheet(
+                "color: red; font-size: 10px; font-weight: bold;"
+            )
+        elif char_count > MAX_INPUT_LENGTH * 0.8:  # 80%时显示警告色
+            self.char_count_label.setStyleSheet("color: orange; font-size: 10px;")
+        else:
+            self.char_count_label.setStyleSheet("color: gray; font-size: 10px;")
+
     def start_translation(self):
         # 获取输入文本
         text = self.input_text.toPlainText().strip()
         if not text:
             QMessageBox.warning(self, TEXT_WARNING, TEXT_EMPTY_INPUT)
             return
+
+        # 检查文本长度
+        if len(text) > MAX_INPUT_LENGTH:
+            reply = QMessageBox.question(
+                self,
+                TEXT_INPUT_TOO_LONG,
+                TEXT_INPUT_LENGTH_WARNING + "\n\n是否继续翻译？",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if reply == QMessageBox.StandardButton.No:
+                return
 
         # 获取目标语言代码
         target_lang = self.target_lang_combo.currentText().split("(")[1].strip(")")
