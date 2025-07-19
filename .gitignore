@@ -10,3 +10,4 @@ wheels/
 .venv
 
 models
+LocalTranslator_Setup.exe
