@@ -1,7 +1,7 @@
 # LocalTranslator（本地翻译器）
 
 <div align="center">
-  <img src="ui/logo_with_txt.png" width="500" alt="FreePDF">
+  <img src="ui/logo_with_txt.png" width="500" alt="LocalTranslator">
   <h4>
     <a href="README.md">🇨🇳 中文</a>
     <span> | </span>
@@ -17,16 +17,10 @@
 - 🎨 **现代化界面**：简洁直观的界面，支持深色/浅色主题
 - ⚡ **实时字数统计**：显示字符计数并提供视觉警告
 - 📝 **智能输入限制**：自动管理文本长度以获得最佳性能
-- 🔄 **双向翻译**：支持任意语言对之间的互译
+
+<img src="ui/demo.gif" width="500" alt="LocalTranslator">
 
 ## 🚀 快速开始
-
-### 系统要求
-
-- Windows 10/11 (64位)
-- Python 3.8或更高版本
-- 至少4GB内存
-- 2GB可用磁盘空间
 
 ### 安装方法
 
@@ -141,16 +135,6 @@ LocalTranslator/
 ├── build.spec# PyInstaller构建配置
 └── installer.nsi# NSIS安装程序脚本
 ```
-
-## 🤝 参与贡献
-
-欢迎贡献！请随时提交Pull Request。
-
-1. Fork本仓库
-2. 创建您的功能分支（`git checkout -b feature/AmazingFeature`）
-3. 提交您的更改（`git commit -m 'Add some AmazingFeature'`）
-4. 推送到分支（`git push origin feature/AmazingFeature`）
-5. 打开Pull Request
 
 ## 🙏 致谢
 

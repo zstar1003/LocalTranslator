@@ -1,7 +1,7 @@
 # LocalTranslator
 
 <div align="center">
-  <img src="ui/logo_with_txt.png" width="500" alt="FreePDF">
+  <img src="ui/logo_with_txt.png" width="500" alt="LocalTranslator">
   <h4>
     <a href="README.md">🇨🇳 中文</a>
     <span> | </span>
@@ -17,16 +17,10 @@
 - 🎨 **Modern UI**: Clean and intuitive interface with dark/light theme support
 - ⚡ **Real-time Character Count**: Shows character count with visual warnings
 - 📝 **Smart Input Limits**: Automatic text length management for optimal performance
-- 🔄 **Bidirectional Translation**: Translate between any supported language pairs
+
+<img src="ui/demo.gif" width="500" alt="LocalTranslator">
 
 ## 🚀 Quick Start
-
-### Prerequisites
-
-- Windows 10/11 (64-bit)
-- Python 3.8 or higher
-- At least 4GB RAM
-- 2GB free disk space
 
 ### Installation
 
@@ -141,17 +135,6 @@ LocalTranslator/
 ├── build.spec           # PyInstaller build configuration
 └── installer.nsi       # NSIS installer script
 ```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 
 ## 🙏 Acknowledgments
 
